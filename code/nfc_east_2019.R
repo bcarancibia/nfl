@@ -67,10 +67,8 @@ eagles_epa_total <- pass_eagles_cumsum %>%
               mutate(Type = "Rush"))
 
 ggthemr("fresh")
-ggplot(eagles_epa_total, aes(x = count, y= epa_sum, color = Type)) +
+p1 <- ggplot(eagles_epa_total, aes(x = count, y= epa_sum, color = Type)) +
   geom_line(size = 1) +
-  geom_segment(x = 96, xend = 96, y = - 25, yend = 50, color = "red", linetype = 2) + 
-  geom_segment(x = 142, xend = 142, y = - 25, yend = 50, color = "red", linetype = 2) +
   xlab("Number of Plays") +
   ylab("Total EPA") +
   labs(caption = "Data From @nflscrapR") +
@@ -109,14 +107,14 @@ cowboys_epa_total <- pass_cowboys_cumsum %>%
               mutate(Type = "Rush"))
 
 ggthemr("fresh")
-ggplot(cowboys_epa_total, aes(x = count, y= epa_sum, color = Type)) +
+p2 <- ggplot(cowboys_epa_total, aes(x = count, y= epa_sum, color = Type)) +
   geom_line(size = 1) +
   xlab("Number of Plays") +
   ylab("Total EPA") +
   labs(caption = "Data From @nflscrapR") +
   labs(title = "Dallas Cowboys: Rush vs Pass EPA for 2019 Season") +
   labs(color = "Play Type") +
-  scale_colour_manual(values = c("navy", "black"))
+  scale_colour_manual(values = c("navy", "gray"))
 
 ##################################################################
 ##                            Giants                            ##
@@ -149,14 +147,14 @@ giants_epa_total <- pass_giants_cumsum %>%
               mutate(Type = "Rush"))
 
 ggthemr("fresh")
-ggplot(giants_epa_total, aes(x = count, y= epa_sum, color = Type)) +
+p3 <- ggplot(giants_epa_total, aes(x = count, y= epa_sum, color = Type)) +
   geom_line(size = 1) +
   xlab("Number of Plays") +
   ylab("Total EPA") +
   labs(caption = "Data From @nflscrapR") +
   labs(title = "New York Giants: Rush vs Pass EPA for 2019 Season") +
   labs(color = "Play Type") +
-  scale_colour_manual(values = c("blue", "black"))
+  scale_colour_manual(values = c("blue", "red"))
 
 
 ##################################################################
@@ -191,7 +189,7 @@ redskins_epa_total <- pass_redskins_cumsum %>%
               mutate(Type = "Rush"))
 
 ggthemr("fresh")
-ggplot(redskins_epa_total, aes(x = count, y= epa_sum, color = Type)) +
+p4 <- ggplot(redskins_epa_total, aes(x = count, y= epa_sum, color = Type)) +
   geom_line(size = 1) +
   xlab("Number of Plays") +
   ylab("Total EPA") +
@@ -200,3 +198,47 @@ ggplot(redskins_epa_total, aes(x = count, y= epa_sum, color = Type)) +
   labs(color = "Play Type") +
   scale_colour_manual(values = c("maroon", "gold"))
 
+
+
+##################################################################
+##                     All Plotted Together                     ##
+##################################################################
+
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+  
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+  
+  numPlots = length(plots)
+  
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+  
+  if (numPlots==1) {
+    print(plots[[1]])
+    
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
+multiplot(p1, p2, p3, p4, cols=2)
+ggsave('nfc_east_2019.png', dpi=1000)
