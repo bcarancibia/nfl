@@ -9,6 +9,7 @@ library(ggrepel)
 library(tictoc)
 library(ggthemes)
 library(ggthemr)
+library(gt)
 
 #################################################################
 ##         Cumulative EPA by play type for 2019 Eagles         ##
@@ -78,9 +79,6 @@ ggplot(eagles_epa_total, aes(x = count, y= epa_sum, color = Type)) +
 
 
 
-ggplot() +
-  geom_line(data = rush_eagles_cumsum, aes(x = count, y = epa_sum, color = "Rush"), colour = "gray") + 
-  geom_line(data = pass_eagles_cumsum, aes(x=count, y=epa_sum, color = "Pass")) +
 
   
   
@@ -119,7 +117,10 @@ ggplot(pass_eagles_cumsum, aes(x=count, y=epa_sum)) +
 ggplot(rush_eagles_cumsum, aes(x=count, y = epa_sum)) + 
   geom_line()
 
-
+ggplot() +
+  geom_line(data = rush_eagles_cumsum, aes(x = count, y = epa_sum, color = "Rush"), colour = "gray") + 
+  geom_line(data = pass_eagles_cumsum, aes(x=count, y=epa_sum, color = "Pass")) +
+  
 
 
 
