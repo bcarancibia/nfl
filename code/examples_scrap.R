@@ -293,6 +293,14 @@ games %>%
 home_games <- games %>% filter(location == "Home")
 summary(home_games$result)
 
+ggplot(home_games,aes(x=result)) +
+  theme_minimal() +
+  geom_histogram(binwidth=1) +
+  xlab("Home Team Net Points") +
+  ylab("Share of Games") +
+  labs(title="Distribution of Home Team Net Points")
+
+
 
 
 

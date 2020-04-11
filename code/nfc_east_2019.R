@@ -242,3 +242,6 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 
 multiplot(p1, p2, p3, p4, cols=2)
 ggsave('nfc_east_2019.png', dpi=1000)
+
+
+
