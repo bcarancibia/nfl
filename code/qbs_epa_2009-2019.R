@@ -191,6 +191,106 @@ qbs[qbs == "G.Minshew II"] <- "G.Minshew"
       c = paste0(round(cpoe, 1)," (",rankc,")"))
 
 
+
 q %>%
-  gt()
+  select(name, posteam, n_plays, e, c, ranke) %>%
+  arrange(desc(e)) %>%
+   gt() %>%
+  cols_align(align = "center") %>%
+  tab_header(
+    title = md("2019 Quarterback Efficiency"),
+    subtitle = md("The Year Carson Wentz Threw It **A LOT** to Bad Receivers")
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "lightgreen"),
+    locations = cells_body(
+      rows = name == "C.Wentz")
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "#F9E3D6"),
+    locations = cells_body(
+    rows = e <= 0.11)
+  ) %>%
+  cols_label(
+    e = md("**EPA/<br>play**"), 
+    c = md("**CPOE**"), 
+    n_plays = md("**Plays**"), 
+    posteam = md("**Team**"),
+    name = md("**Player**"),
+    ranke = md("**EPA Rank**")) %>%
+  tab_source_note(
+    source_note = paste("Table: @bcarancibia | Idea from @benbaldwin | Data: @nflscrapR | 
+                        CPOE = Completion Percentage Over Expectation based on target depth. | Min", qb_min, "plays |
+                        Everything in Light Red are QBs below average EPA per play"
+  )) %>%
+  gtsave("2019qb_efficiency.png", expand = 10)
+
+##################################################################
+##                        look at Carson                        ##
+##################################################################
+
+season_17 <- qbs %>% filter(season == 2017)
+season_18 <- qbs %>% filter(season == 2018)
+season_19 <- qbs %>% filter(season == 2019)
+season_16 <- qbs %>% filter(season == 2016)
+
+w <- qbs %>% ungroup() %>% 
+  filter(name == "C.Wentz") %>%
+  select(name,posteam, n_plays,index, epa,unadjusted_epa, success,cpoe, season) %>%
+  mutate(
+    ranke = rank(-epa),
+    ranki = rank(-index),
+    rankeu = rank(-unadjusted_epa),
+    ranks = rank(-success),
+    rankc = rank(-cpoe),    
+    i = paste0(round(index, 2)," (",ranki,")"),
+    e = paste0(round(epa, 2)),
+    eu = paste0(round(unadjusted_epa, 2)," (",rankeu,")"),
+    s = paste0(round(success, 2)," (",ranks,")"),
+    c = paste0(round(cpoe, 1)))
+
+w %>%
+  select(name, posteam, n_plays, e, c, season) %>%
+  arrange(season) %>%
+  gt() %>%
+  cols_align(align = "center") %>%
+  tab_header(
+    title = md("Carson Wentz EPA"),
+    subtitle = md("Since 2016 Carson Wentz Has Been Above Average EPA per Play")
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "#F9E3D6"),
+    locations = cells_body(
+      rows = season == 2016)
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "lightgreen"),
+    locations = cells_body(
+      rows = season == 2017)
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "lightgreen"),
+    locations = cells_body(
+      rows = season == 2018)
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "lightgreen"),
+    locations = cells_body(
+      rows = season == 2019)
+  ) %>%
+  cols_label(
+    e = md("**EPA/<br>play**"),
+    c = md("**CPOE**"),
+    season = md("**Season Year**"),
+    n_plays = md("**Plays**"), 
+    posteam = md("**Team**"),
+    name = md("**Player**")) %>%
+  tab_source_note(
+    source_note = paste("Table: @bcarancibia | Idea from @benbaldwin | Data: @nflscrapR | 
+                        CPOE = Completion Percentage Over Expectation based on target depth. | Min", qb_min, "plays |
+                        Everything in Light Red are QBs below average EPA per play"
+    )) %>%
+  gtsave("carson.png", expand = 10)
+
+
     
