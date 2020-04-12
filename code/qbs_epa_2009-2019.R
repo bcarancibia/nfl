@@ -10,6 +10,7 @@ library(tictoc)
 library(ggthemes)
 library(ggthemr)
 library(gt)
+source("~/nfl/code/helpers.R")
 
 ##################################################################
 ##              Look at QBs Over Past 10 Years EPA              ##
@@ -104,3 +105,65 @@ for (yr in first:last) {
 }
 
 pbp_all <- dplyr::bind_rows(datalist)
+
+#################################################################
+##                    clean up player names                    ##
+#################################################################
+
+
+pbp_all_rp <- pbp_all %>%
+  filter(!is_na(epa), !is_na(posteam), play_type=="no_play" | play_type=="pass" | play_type=="run") %>%
+  mutate(
+    pass = if_else(str_detect(desc, "( pass)|(sacked)|(scramble)"), 1, 0),
+    rush = if_else(str_detect(desc, "(left end)|(left tackle)|(left guard)|(up the middle)|(right guard)|(right tackle)|(right end)") & pass == 0, 1, 0),
+    success = ifelse(epa>0, 1 , 0),
+    passer_player_name = ifelse(play_type == "no_play" & pass == 1, 
+                                str_extract(desc, "(?<=\\s)[A-Z][a-z]*\\.\\s?[A-Z][A-z]+(\\s(I{2,3})|(IV))?(?=\\s((pass)|(sack)|(scramble)))"),
+                                passer_player_name),
+    receiver_player_name = ifelse(play_type == "no_play" & str_detect(desc, "pass"), 
+                                  str_extract(desc, "(?<=to\\s)[A-Z][a-z]*\\.\\s?[A-Z][A-z]+(\\s(I{2,3})|(IV))?"),
+                                  receiver_player_name),
+    rusher_player_name = ifelse(play_type == "no_play" & rush == 1, 
+                                str_extract(desc, "(?<=\\s)[A-Z][a-z]*\\.\\s?[A-Z][A-z]+(\\s(I{2,3})|(IV))?(?=\\s((left end)|(left tackle)|(left guard)|		      (up the middle)|(right guard)|(right tackle)|(right end)))"),
+                                rusher_player_name),
+    name = ifelse(!is_na(passer_player_name), passer_player_name, rusher_player_name),
+    yards_gained=ifelse(play_type=="no_play",NA,yards_gained),
+    play=1
+  ) %>%
+  filter(pass==1 | rush==1)
+
+
+
+
+
+
+qb_min <- 150
+
+
+pbp_all_test <- pbp_all_rp %>%
+  filter(season >= 2006) %>%
+  fix_pbp() %>%
+  apply_completion_probability() %>%
+  fix_fumbles()
+
+qbs <- pbp_all_rp %>%
+  group_by(name, season, posteam) %>%
+  mutate(
+    unadjusted_epa = epa,
+    epa = ifelse(epa < -4.5, -4.5, epa)) %>%
+  summarize (
+    n_plays = sum(play),
+    n_db = sum(complete_pass) + sum(incomplete_pass),
+    cpoe = mean(100*(complete_pass - cp), na.rm = TRUE),
+    epa = mean(epa),
+    unadjusted_epa = mean(unadjusted_epa),
+    success = mean(success),
+    index = 0.248070 * epa + 0.006686 * cpoe + 0.080851
+  ) %>%
+  filter(n_db > 50 & n_plays >= qb_min) %>% ungroup() %>%
+  group_by(name) %>%
+  mutate(
+    lcpoe = lag(cpoe, n = 1, order_by = season),
+    lepa = lag(epa, n = 1, order_by = season),
+    lindex = lag(index, n = 1, order_by = season)
+  )
