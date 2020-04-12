@@ -11,7 +11,6 @@ library(jsonlite)
 library(glue)
 library(janitor)
 library(tidyverse)
-
 library(espnscrapeR)
 
 #functions

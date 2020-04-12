@@ -111,7 +111,7 @@ pbp_all <- dplyr::bind_rows(datalist)
 #################################################################
 
 
-pbp_all_rp <- pbp_all %>%
+pbp_all <- pbp_all %>%
   filter(!is_na(epa), !is_na(posteam), play_type=="no_play" | play_type=="pass" | play_type=="run") %>%
   mutate(
     pass = if_else(str_detect(desc, "( pass)|(sacked)|(scramble)"), 1, 0),
@@ -124,7 +124,7 @@ pbp_all_rp <- pbp_all %>%
                                   str_extract(desc, "(?<=to\\s)[A-Z][a-z]*\\.\\s?[A-Z][A-z]+(\\s(I{2,3})|(IV))?"),
                                   receiver_player_name),
     rusher_player_name = ifelse(play_type == "no_play" & rush == 1, 
-                                str_extract(desc, "(?<=\\s)[A-Z][a-z]*\\.\\s?[A-Z][A-z]+(\\s(I{2,3})|(IV))?(?=\\s((left end)|(left tackle)|(left guard)|		      (up the middle)|(right guard)|(right tackle)|(right end)))"),
+                                str_extract(desc, "(?<=\\s)[A-Z][a-z]*\\.\\s?[A-Z][A-z]+(\\s(I{2,3})|(IV))?(?=\\s((left end)|(left tackle)|(left guard)|(up the middle)|(right guard)|(right tackle)|(right end)))"),
                                 rusher_player_name),
     name = ifelse(!is_na(passer_player_name), passer_player_name, rusher_player_name),
     yards_gained=ifelse(play_type=="no_play",NA,yards_gained),
@@ -135,18 +135,15 @@ pbp_all_rp <- pbp_all %>%
 
 
 
-
-
 qb_min <- 150
 
 
-pbp_all_test <- pbp_all_rp %>%
+pbp_all_test <- pbp_all %>%
   filter(season >= 2006) %>%
-  fix_pbp() %>%
   apply_completion_probability() %>%
   fix_fumbles()
 
-qbs <- pbp_all_rp %>%
+qbs <- pbp_all_test %>%
   group_by(name, season, posteam) %>%
   mutate(
     unadjusted_epa = epa,
@@ -167,3 +164,33 @@ qbs <- pbp_all_rp %>%
     lepa = lag(epa, n = 1, order_by = season),
     lindex = lag(index, n = 1, order_by = season)
   )
+
+qbs[qbs == "Alex Smith"] <- "A.Smith" #for some reason alex smith appears once. 
+qbs[qbs == "G.Minshew II"] <- "G.Minshew"
+
+#################################################################
+##                    Break it up by Season                    ##
+#################################################################
+
+
+
+
+  q<- qbs %>% ungroup() %>% 
+    filter(season == 2019) %>%
+    select(name,posteam, n_plays,index, epa,unadjusted_epa, success,cpoe) %>%
+    mutate(
+      ranke = rank(-epa),
+      ranki = rank(-index),
+      rankeu = rank(-unadjusted_epa),
+      ranks = rank(-success),
+      rankc = rank(-cpoe),    
+      i = paste0(round(index, 2)," (",ranki,")"),
+      e = paste0(round(epa, 2)," (",ranke,")"),
+      eu = paste0(round(unadjusted_epa, 2)," (",rankeu,")"),
+      s = paste0(round(success, 2)," (",ranks,")"),
+      c = paste0(round(cpoe, 1)," (",rankc,")"))
+
+
+q %>%
+  gt()
+    
