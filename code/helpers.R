@@ -480,3 +480,20 @@ get_qb_dvoa <- function(year) {
   return(r)
   
 }
+
+
+my_colors_always <- c("#CAF2C2", "#98D9A8", "#69B6A3", "#428185", "#1E3C58", "#202B40", "#1E1E32")
+my_colors_green <- c("#C2C5C0", "#A6B39C", "#8BA27C", "#6A915F", "#4C7F46", "#316E31", "#1F5D25")
+my_colors_red5 <- c("#5C0000", "#890000", "#C50000", "#FB7E00", "#FFA700")
+my_colors_raven <- c("#006699", "#1B80B3", "#41A6D9", "#98C2D9", "#D9AC82", "#D97C21", "#B35900")
+my_colors_luna <- c("#084D49", "#276C69", "#189BA0", "#73C1C4", "#BF8699", "#A64264", "#830042")
+
+
+ 
+  
+  
+  
+  
+  
+  
+  
