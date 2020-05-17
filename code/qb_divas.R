@@ -193,7 +193,7 @@ round_two %>%
     passer = md("**Quarterback**"),
     round = md("**Round TD Receiver Drafted**"),
     n = md("**Number of Times Recieved TD**")) %>%
-  tab_source_note("Table: @bcarancibia | PBP and Roster Data: @nflfastR | Draft PickData: @LeeSharpeNFL" ) %>%
+  tab_source_note("Table: @bcarancibia | PBP and Roster Data: @nflfastR | Draft Pick Data: @LeeSharpeNFL" ) %>%
   gtsave("secondround.png", expand = 10)
 
 
